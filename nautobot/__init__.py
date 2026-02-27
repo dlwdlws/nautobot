@@ -5,8 +5,10 @@ import sys
 
 import django
 
-# Primary package version
-__version__ = metadata.version(__name__)
+try:
+    __version__ = metadata.version(__name__)
+except metadata.PackageNotFoundError:
+    __version__ = "0.0.0"
 
 # Sentinel to make sure we only initialize once.
 __initialized = False

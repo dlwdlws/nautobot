@@ -157,8 +157,18 @@ def print_command(command, env=None):
 
 
 def get_nautobot_major_minor_version(context):
-    command = r"""grep '^version = ' pyproject.toml | sed -E 's/version = "([0-9]+\.[0-9]+).*"/\1/'"""
-    return context.run(command, hide=True).stdout.strip()
+    pyproject_path = os.path.join(BASE_DIR, "pyproject.toml")
+    try:
+        with open(pyproject_path, encoding="utf-8") as file:
+            for line in file:
+                stripped = line.strip()
+                if stripped.startswith("version"):
+                    match = re.search(r'version\s*=\s*"(?P<version>\d+\.\d+)', stripped)
+                    if match:
+                        return match.group("version")
+    except FileNotFoundError as exc:
+        raise Exit(f"Unable to open {pyproject_path}") from exc
+    raise Exit("Unable to determine Nautobot version from pyproject.toml")
 
 
 def docker_compose(context, command, **kwargs):
